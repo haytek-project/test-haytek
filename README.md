@@ -65,3 +65,8 @@ Segue as apis que serão usadas para o desafio.
 | :---------- | :--------- | :------------------------------------------ |
 | `type`      | `string` | **Obrigatório**. O ID do item que você quer |
 | `size`      | `string` | **Obrigatório**. O ID do item que você quer |
+
+
+### Instruções de entrega do desafio
+
+1.
