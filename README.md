@@ -30,7 +30,7 @@ Segue as apis que serão usadas para o desafio.
 ### Address
 
 ```http
-  https://stg-api.haytek.com.br/api/v1/test-haytek-api/orders
+  https://stg-api.haytek.com.br/api/v1/test-haytek-api/adresses
 ```
 
 | Parâmetro   | Tipo       | Descrição                                   |
@@ -46,7 +46,7 @@ Segue as apis que serão usadas para o desafio.
 ### Carriers
 
 ```http
-  https://stg-api.haytek.com.br/api/v1/test-haytek-api/orders
+  https://stg-api.haytek.com.br/api/v1/test-haytek-api/carriers
 ```
 
 | Parâmetro   | Tipo       | Descrição                                   |
@@ -58,7 +58,7 @@ Segue as apis que serão usadas para o desafio.
 ### Boxes
 
 ```http
-  https://stg-api.haytek.com.br/api/v1/test-haytek-api/orders
+  https://stg-api.haytek.com.br/api/v1/test-haytek-api/boxes
 ```
 
 | Parâmetro   | Tipo       | Descrição                                   |
