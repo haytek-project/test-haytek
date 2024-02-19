@@ -18,11 +18,11 @@ Criar README do projeto descrevendo as tecnologias utilizadas, chamadas dos serv
 
 Seu projeto será avaliado de acordo com os seguintes critérios.
 
-Sua aplicação atende funcionalmente o que foi pedido
-Você documentou a maneira de configurar o ambiente e rodar sua aplicação na maquina do avaliador
-Você seguiu as instruções enviadas
-Voce segue as boas práticas de programação e entrega para o Cliente
-O código escrito é facil de entender e manter
+1. Sua aplicação atende funcionalmente o que foi pedido
+2. Você documentou a maneira de configurar o ambiente e rodar sua aplicação na maquina do avaliador
+3. Você seguiu as instruções enviadas
+4. Voce segue as boas práticas de programação e entrega para o Cliente
+5. O código escrito é facil de entender e manter
 
 
 
