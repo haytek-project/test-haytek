@@ -10,6 +10,22 @@ Este projeto visa implementar de forma eficiente um backend com uma regra de neg
 
 Fique a vontade para usar qualquer tecnologia que preferir, para nós será um diferencial o uso de [Node](https://nodejs.org/en/) e [NestJs](https://nestjs.com/). 
 
+## Requisitos
+
+Criar README do projeto descrevendo as tecnologias utilizadas, chamadas dos serviços e configurações necessário para executar a aplicação.
+
+## Avaliação
+
+Seu projeto será avaliado de acordo com os seguintes critérios.
+
+Sua aplicação atende funcionalmente o que foi pedido
+Você documentou a maneira de configurar o ambiente e rodar sua aplicação na maquina do avaliador
+Você seguiu as instruções enviadas
+Voce segue as boas práticas de programação e entrega para o Cliente
+O código escrito é facil de entender e manter
+
+
+
 ## API
 
 Segue as apis que serão usadas para o desafio.
