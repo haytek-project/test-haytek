@@ -1,10 +1,12 @@
 # Desafio Técnico Haytek! 
 
-Bem vindo ao nosso desafio.
+Bem vindo ao desafio técnico da Haytek. Este teste é composto de duas partes, uma de Backend e a outra de Frontend.
 
 ## Descrição
 
-Este projeto visa implementar de forma eficiente um backend com uma regra de negócio de frete otimizado e exibir esses dados em um front. 
+A Haytek é uma empresa que vende lentes oftálmicas para óticas de todo o Brasil. Nossos clientes costumam realizar diversos pedidos por dia em nosso e-commerce. 
+
+Como forma de otimizar o custo logístico de nossos clientes, queremos desenvolver uma funcionalidade que identifique todos os pedidos que são enviados num mesmo dia para um mesmo endereço de entrega e os agrupe no menor número possível de caixas.
 
 ## Tecnologias
 
@@ -24,7 +26,35 @@ Seu projeto será avaliado de acordo com os seguintes critérios.
 4. Voce segue as boas práticas de programação e entrega para o Cliente
 5. O código escrito é facil de entender e manter
 
+## Desafio
 
+### Parte 1: Backend
+
+A parte 1 do desafio consiste em criar uma rota de API que agrupe os diversos pedidos em caixas, respeitando as seguintes regras:
+
+- Pedidos enviados dentro de uma mesma data para um mesmo endereço devem ser agrupados em entregas.
+- Uma mesma entrega pode conter mais de uma caixa.
+- Os pedidos só podem ser agrupados, se forem enviados pela mesma transportadora
+- Cada transportadora tem um horário de corte. Pedidos realizados antes do horário de corte, são enviados no mesmo dia. Pedidos realizados após o horário de corte, são enviados no dia seguinte.
+- As entregas devem ser agrupados no menor numero de caixas possível. Além disso, deve-se procurar usar sempre a menor caixa disponível. Para efeito de clareza, a soma da quantidade máxima de itens das caixas de uma mesma entrega deve ser a menor possível.
+- Para efeito de simplificação, todos os produtos desse teste terão o mesmo volume. Sendo assim, nos endpoints que você irá usar informamos apenas a quantidade de itens de cada pedido e o número máximo de itens que cabem em cada tipo de caixa que temos disponíveis.
+- O mesmo pedido pode ser quebrado em mais de uma caixa, se preciso.
+
+A rota que você irá desenvolver deverá retornar as seguintes informações:
+
+- Entregas:
+  - Data de Envio
+  - Transportadora
+  - Endereço Completo(Cidade, Bairro, Rua, Complemento, Cep )
+  - Caixas:
+    - Tipo
+    - Qtd de Itens na caixa
+    - Cod. dos Pedidos contidos na caixa ( o mesmo pedido pode aparecer em mais de uma caixa)
+
+### Parte 2: Frontend
+
+1. Criar uma página web que consulte o endpoint de API que você acabou de criar e renderizar a lista de entregas na tela.
+2. Não iremos avaliar a qualidade do layout, somente as informações que serão impressas na tela
 
 ## API
 
@@ -38,10 +68,11 @@ Segue as apis que serão usadas para o desafio.
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `Id`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `addressId`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `carrierId`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `createdAt`      | `string` | **Obrigatório**. O ID do item que você quer |
+| `Id`      | `string` | Identificador único do pedido |
+| `addressId`      | `string` | Endereço usado no pedido |
+| `carrierId`      | `string` | Transportadora usada no pedido |
+| `createdAt`      | `string` | Data de criação do pedido |
+| `quantity`      | `number` | O numero de produtos do pedido |
 
 ### Address
 
@@ -51,13 +82,13 @@ Segue as apis que serão usadas para o desafio.
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `Id`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `state`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `zipcode`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `street`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `complement`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `neighborhood`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `city`      | `string` | **Obrigatório**. O ID do item que você quer |
+| `Id`      | `string` | Identificador único do endereço |
+| `state`      | `string` | Estado |
+| `zipcode`      | `string` | CEP |
+| `street`      | `string` | Rua |
+| `complement`      | `string` | Complemento |
+| `neighborhood`      | `string` | Bairro |
+| `city`      | `string` | Cidade |
 
 ### Carriers
 
@@ -67,9 +98,9 @@ Segue as apis que serão usadas para o desafio.
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `Id`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `name`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `cutOffTime`      | `string` | **Obrigatório**. O ID do item que você quer |
+| `Id`      | `string` | Identificador único da transportadora |
+| `name`      | `string` | O nome da transportadora |
+| `cutOffTime`      | `string` | O horário de corte da transportadora |
 
 ### Boxes
 
@@ -79,10 +110,5 @@ Segue as apis que serão usadas para o desafio.
 
 | Parâmetro   | Tipo       | Descrição                                   |
 | :---------- | :--------- | :------------------------------------------ |
-| `type`      | `string` | **Obrigatório**. O ID do item que você quer |
-| `size`      | `string` | **Obrigatório**. O ID do item que você quer |
-
-
-### Instruções de entrega do desafio
-
-1.
+| `type`      | `string` | O tipo daquela caixa |
+| `maxQuantity`      | `string` | A quantidade máxima de produtos que a caixa comporta |
