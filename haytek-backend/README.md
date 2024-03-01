@@ -78,3 +78,4 @@ Nest is [MIT licensed](LICENSE).
 ## INSTALAÇÃO
 npm i --save @nestjs/axios axios
 npm install @nestjs/class-validator --save
+npm i @nestjs/class-transformer

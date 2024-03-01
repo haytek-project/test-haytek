@@ -5,6 +5,8 @@ import { CarriersService } from 'src/carriers/carriers.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { CreateDeliveryDto } from './dto/create-delivery.dto';
 import { UsedBoxDto } from './dto/usedBox.dto';
+import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
+import { exit } from 'process';
 
 
 
@@ -19,33 +21,6 @@ export class DeliveryService {
         
     
     async delivery(){
-       
-        // function isSameDay(d1, d2) {
-        //     return d1.getFullYear() === d2.getFullYear() &&
-        //       d1.getDate() === d2.getDate() &&
-        //       d1.getMonth() === d2.getMonth();
-        // }
-
-        // const teste = new Date()
-        // const teste2 = new Date("2024-02-04T10:14:03.997Z")
-        // console.log(isSameDay(teste, teste2))
-
-        
-        // const teste = new Date()
-        // console.log(teste)
-        // console.log(teste.getDate())
-        // console.log(teste.getMonth())
-        // console.log(teste.getFullYear())
-
-        // const a = new DateWithoutTime(new Date().toISOString());
-        // const b = new DateWithoutTime("2022-12-25T23:55:00.000Z");
-        // console.log(a, b)
-
-
-
-
-        // return 0 
-
         const adresses = await this.adressService.findAll()
         const boxes = await this.boxesService.findAll()
         const carriers = await this.carriesService.findAll()
@@ -62,203 +37,79 @@ export class DeliveryService {
 
 
         let deliveryFullList = []
+        //Pegando uma lista com a datas únicas dos pedidos retornados na api de pedidos
         const ordersDateList = this.getOrdersDate(orders)
-        // const orderAdressList = this.getOrdersAdress(orders)
 
+        ordersDateList.forEach((orderDate) => {
 
-        for (const orderDate in ordersDateList){
-            const groupedByDateOrderList = this.groupOrdersByDate(orderDate, orders)
-            
-            for (const adr in adresses){               
-                const groupedByAdressOrderList = this.groupOrdersByAdress(adresses[adr].Id, groupedByDateOrderList)
+            // Agrupando pedidos por data
+            const groupByDate = this.groupOrdersByDate(orderDate, orders)
+                   
+            adresses.forEach((adress) => {
 
-                if (groupedByAdressOrderList != undefined && groupedByAdressOrderList.length != 0){
-                    for (const carrier in carriers){
-                        const groupedByCarrierOrderList = this.groupOrdersByCarrier(carriers[carrier].Id, groupedByAdressOrderList)
+                // Agrupando pedidos por endereco
+                const groupByAdress = this.groupOrdersByAdress(adress.Id, groupByDate)
+
+                // Caso a lista retornada não for vazia
+                if (groupByAdress != undefined && groupByAdress.length != 0){
+
+                    // Agrupando pedidos por entrega
+                    carriers.forEach((carrier) => {    
+                        const groupByCarrier = this.groupOrdersByCarrier(carrier.Id, groupByAdress)
                         
-                        if (groupedByCarrierOrderList != undefined && groupedByCarrierOrderList.length != 0){
-                            console.log("indiciando deliveryDTO")
-                            let regularDelivery = new CreateDeliveryDto()
-                            let cutOffDelivery  = new CreateDeliveryDto()
-
+                        // Caso a lista retornada não for vazia
+                        if (groupByCarrier != undefined && groupByCarrier.length != 0){
                             
-                            console.log(groupedByCarrierOrderList)
-                            for (const item in groupedByCarrierOrderList){    
-                                let order = groupedByCarrierOrderList[item]        
+                            // Inicializando DTO's para armazenar as entregas normais e as entregas com cutOff
+                            let regularDelivery = new CreateDeliveryDto(); 
+                            let cutOffDelivery  = new CreateDeliveryDto(); 
+                                                
+                            
+                            // Varrendo lista com todos os pedidos agrupados por Data, Endereco e Transportadora
+                            groupByCarrier.forEach((order) => {                                 
                                 let adress = this.findAdressById(order.addressId, adresses)[0]
                                 let carrier = this.findCarrierBydId(order.carrierId, carriers)[0]
 
 
+                                // convertendo hora e minuto do pedido para minutos
                                 let orderCreatedDate = new Date(order.createdAt)
-                                const orderHour =  Number(orderCreatedDate.getUTCHours())
-                                const orderMinutes =  Number(orderCreatedDate.getMinutes())
-                                const orderTime = ((orderHour * 60) + orderMinutes)
+                                const orderTime = ((Number(orderCreatedDate.getUTCHours()) * 60) + Number(orderCreatedDate.getUTCMinutes()))
 
-                                const cutOffHour = Number(carrier.cutOffTime.split(':')[0])
-                                const cutOffMinutes = Number(carrier.cutOffTime.split(':')[1])
-                                const cutOffTime = ((cutOffHour * 60) + cutOffMinutes)                                              
+                                  // convertendo hora e minuto do cutOff para minutos
+                                const cutOffTime = ((Number(carrier.cutOffTime.split(':')[0]) * 60) + Number(carrier.cutOffTime.split(':')[1]))                                              
 
                                 if (orderTime < cutOffTime){            
                                     // DIA ATUAL                      
                                     regularDelivery.sendDate = orderCreatedDate
                                     regularDelivery.adress = adress
-                                    regularDelivery.carrier = carrier
-                                    // regularDelivery.orders.push( order )
+                                    regularDelivery.carrier = carrier                               
+                                    regularDelivery.orderList.push(order)
+                                    regularDelivery.totalQuantity = regularDelivery.totalQuantity + order.quantity
                                 }else{
                                     // DIA SEGUINTE
                                     orderCreatedDate.setDate(orderCreatedDate.getDate() + 1)
                                     cutOffDelivery.sendDate = orderCreatedDate
                                     cutOffDelivery.adress = adress
                                     cutOffDelivery.carrier = carrier
-                                    // regularDelivery.orders.push( order )
+                                    cutOffDelivery.orderList.push( order )
+                                    cutOffDelivery.totalQuantity = cutOffDelivery.totalQuantity + order.quantity
                                 }
-                            }
-                            console.log(regularDelivery, cutOffDelivery)
+                            });
+                            // console.log(regularDelivery, cutOffDelivery)
                             if (regularDelivery.sendDate != undefined) deliveryFullList.push(regularDelivery)
-                            if (cutOffDelivery.sendDate != undefined) deliveryFullList.push(cutOffDelivery)
-                        
-                            // console.log(qtdItens)
-                            // this.getBoxesPerDelivery(qtdItens, groupedByCarrierOrderList, boxes)
-                            console.log('------------------')
-                            // return delivery
-                            
+                            if (cutOffDelivery.sendDate != undefined) deliveryFullList.push(cutOffDelivery)                            
                         }
-                    }
+                    });
                 }
                 
-            }
-        }
+            });
+        });
+
+        this.getBoxesPerDelivery(deliveryFullList, boxes)
+
+
         return deliveryFullList
 
-        // for (const item in ordersDate){
-        //     const orderDate = new Date(ordersDate[item])
-        //     const ordersSortedByDate =  orders.filter(function(order) {
-        //         const internalDate = new Date(order.createdAt)
-        //         return internalDate.getDate() === orderDate.getDate() &&
-        //                internalDate.getMonth() === orderDate.getMonth() && 
-        //                internalDate.getFullYear() === orderDate.getFullYear()
-        //       });
-
-        //     for (const adr in adresses){                
-        //         const orderSortedByAdress =  ordersSortedByDate.filter(function(item){
-        //             return item.addressId === adresses[adr].Id
-        //         });
-        //         if (orderSortedByAdress.length != 0){
-
-        //             for (const carrier in carriers){
-        //                 const orderSortedByCarrier = orderSortedByAdress.filter(function(order){
-        //                     return order.carrierId === carriers[carrier].Id
-        //                 });
-        //                 if (orderSortedByCarrier.length != 0){
-        //                     delivery.push(orderSortedByCarrier)
-
-        //                 }
-        //             }
-        //         }
-
-
-        //     }
-
-        // }
-    
-        // console.log(delivery)
-        // for (const deli in delivery){
-        //     let totalQtd = 0
-        //     for (var i = 0; i < delivery[deli].length; i +=1){
-        //         totalQtd = totalQtd + delivery[deli][i].quantity
-        //     }      
-        //     console.log(this.getBoxesPerDelivery(totalQtd, boxes))
-        //     // console.log(totalQtd)      
-        //     console.log("--------------")
-        // }
-        // return delivery
-        
-
-
-        // console.log(new Date(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()))
-        // console.log(new Date(dt.getFullYear(), dt.getMonth(), dt.getDate()).setHours(0,0,0,0))
-        // return 0
-
-
-
-
-        //     let date = new DateWithoutTime(orders[order].createdAt)
-        //     console.log(orders[order].createdAt)
-        //     console.log(date)
-        //     // const vent = !!ordersDate.find(orderDate => {return orderDate === date})
-        //     if (!(ordersDate.includes(date))){
-        //         ordersDate.push(date)
-        //         console.log("if")
-        //     }else{
-        //         console.log("else")
-        //     }
-            
-        // }
-
-        // console.log(ordersDate)
-
-        // for (const order in orders){
-        //     let date = new Date(orders[order].createdAt).setHours(0,0,0,0)
-        //     // let day = date.getDay()
-        //     // let mounth = date.getMonth()
-        //     // let year = date.getFullYear()
-
-        //     var aquaticCreatures =  orders.filter(function(order) {
-        //         return new Date(order.createdAt).setHours(0,0,0,0) == date, order.addressId == "11fbe6ba-e46d-47c0-bb29-f95831fa5131";
-        //       });
-
-        //       console.log(aquaticCreatures)
-        //       console.log("#############################################################")
-
-        // }
-          
-
-        // var aquaticCreatures =  orders.filter(function(order) {
-        //     return order.quantity == 27;
-        //   });
-
-        // console.log(aquaticCreatures)
-
-        // for(const order in orders){
-        //     const now = new Date('2024-02-14T22:47:28.992Z')
-        //     const orderDate = new Date(orders[order].createdAt)
-        //     if (now > orderDate){
-        //         console.log(now,orderDate, "MAIOR")
-        //     }else{
-        //         console.log(now,orderDate, "MENOR")
-        //     }
-
-        // }
-
-
-  
-
-
-        // orders.sort((a, b) => {
-        //     let da = new Date(a.createdAt),
-        //         db = new Date(b.createdAt);
-        //     return da - db;
-        // });
-
-        // orders.forEach((e) => {
-        //     console.log(`${e.addressId} ${e.carrierId} ${e.createdAt}`);
-        // });
-        // console.log(Object.keys(adresses).length)
-        // for (const i in adresses){
-        //   console.log(adresses[i])
-        // }
-
-
-        // console.log(Object.keys(orders).length)
-        // for (const i in orders){
-
-        //   console.log(orders[i].createdAt)
-        // }
-
-        
-        // console.log(boxes)
-        // console.log(carriers)
-        // console.log(orders)
     }
 
 
@@ -297,12 +148,12 @@ export class DeliveryService {
 
 
     groupOrdersByDate(date, orders){
-        const orderDate = new Date(orders[date].createdAt)
+        const orderDate = new Date(date)
         const ordersSortedByDate =  orders.filter(function(order) {
             const internalDate = new Date(order.createdAt)
-            return internalDate.getDate() === orderDate.getDate() &&
-                    internalDate.getMonth() === orderDate.getMonth() && 
-                    internalDate.getFullYear() === orderDate.getFullYear()
+            return internalDate.getUTCDate() === orderDate.getUTCDate() &&
+                    internalDate.getUTCMonth() === orderDate.getUTCMonth() && 
+                    internalDate.getUTCFullYear() === orderDate.getUTCFullYear()
         });
         return ordersSortedByDate
 
@@ -311,45 +162,151 @@ export class DeliveryService {
 
     getOrdersDate(orders){
         let ordersDate = []
-        for (const order in orders){
-            let a = new Date(orders[order].createdAt)
-            let dt = new Date(a.getFullYear(), a.getMonth(), a.getDate())    
-            if (!(ordersDate.includes(dt.toDateString()))){
-                ordersDate.push(dt.toDateString())
-            }            
-        }
+        orders.forEach((o) => {
+            let orderDate = new Date(o.createdAt)
+            if (!(ordersDate.includes(orderDate.toDateString()))){
+                ordersDate.push(orderDate.toDateString())
+            } 
+
+        });
         return ordersDate
     }
 
 
     getOrdersAdress(orders){
         let ordersAdress = []
-        for (const order in orders){
-            if (!(ordersAdress.includes(orders[order].addressId))){
-                ordersAdress.push(orders[order].addressId)
-            }            
-        }
+        orders.forEach((o) => {
+            if (!(ordersAdress.includes(o.addressId))){
+                ordersAdress.push(o.addressId)
+            } 
+
+        });
         return ordersAdress
 
     }
 
+    getBoxesPerDelivery(deliveryFullList, boxes){
+        let G = 30
+        let M = 10
+        let P = 5
+        deliveryFullList.forEach((delivery) => {
+            console.log(delivery)
+            // console.log(delivery.orderList)
+            let BoxesList = []
+            let totalDelivery = delivery.totalQuantity
+            delivery.orderList.forEach((order) => {
+                let totalOrder = order.quantity
+                console.log(totalDelivery)
+                console.log(totalOrder)
+                
+                while (totalDelivery > 0 && totalOrder > 0){
+                    if (totalOrder >= G){
+                        let usedBoxDto = new UsedBoxDto()
+                        usedBoxDto.itemsQty = G
+                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                        usedBoxDto.type = 'G'
+                        totalDelivery = totalDelivery - G
+                        totalOrder = totalOrder - G
+                        BoxesList.push(usedBoxDto)
+                        console.log("caixa G")
+                        console.log(totalDelivery)
+                        console.log(totalOrder)
+                        
+                    }
+                    if (totalOrder > M && totalOrder < G){
+                        let usedBoxDto = new UsedBoxDto()
+                        usedBoxDto.itemsQty = M
+                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                        usedBoxDto.type = 'M'
+                        totalDelivery = totalDelivery - M
+                        totalOrder = totalOrder - M
+                        BoxesList.push(usedBoxDto)
+                        console.log("caixa M")
+                        console.log(totalDelivery)
+                        console.log(totalOrder)
 
-    // getBoxesEnum(boxes){
-    //     let result = {}
-    //     for (const box in boxes){
-    //         result.push(123)
-    //     }
-    // }
-    getBoxesPerDelivery(total, orders, boxes){
+                    }
+                    if (totalOrder > P && totalOrder < M){
+                        let usedBoxDto = new UsedBoxDto()
+                        usedBoxDto.itemsQty = P
+                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                        usedBoxDto.type = 'P'
+                        totalDelivery = totalDelivery - P
+                        totalOrder = totalOrder - P
+                        BoxesList.push(usedBoxDto)
+                        console.log("caixa P")
+                        console.log(totalDelivery)
+                        console.log(totalOrder)
+
+                    }
+                    if (totalOrder <= P ){
+                        let usedBoxDto = new UsedBoxDto()
+                        usedBoxDto.itemsQty = totalOrder
+                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                        usedBoxDto.type = 'P'
+                        totalDelivery = totalDelivery - totalOrder
+                        totalOrder = totalOrder - totalOrder
+                        BoxesList.push(usedBoxDto)
+                        console.log("caixa P")
+                        console.log(totalDelivery)
+                        console.log(totalOrder)
+
+                    }
+                    // exit()
+                }
+
+                
+
+                
+
+                // while ( total < M){
+                //     if (order.quantity > P){
+                //         let usedBoxDto = new UsedBoxDto()
+                //         usedBoxDto.itemsQty = 5
+                //         usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                //         usedBoxDto.type = 'P'
+                //         total = total - P
+                //         BoxesList.push(usedBoxDto)
+                //     }
+                //     if (order.quantity < P){
+                //         let usedBoxDto = new UsedBoxDto()
+                //         usedBoxDto.itemsQty = 5
+                //         usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                //         usedBoxDto.type = 'P'
+                //         total = total - P
+                //         BoxesList.push(usedBoxDto)
+                //     }
+                // }
+
+                // while (total <= P){
+                //     if (order.quantity > P){
+                //         let usedBoxDto = new UsedBoxDto()
+                //         usedBoxDto.itemsQty = 5
+                //         usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
+                //         usedBoxDto.type = 'P'
+                //         total = total - P
+                //         BoxesList.push(usedBoxDto)
+                //     }
+                // }
+                
+            });
+            console.log(BoxesList)
+
+            // delivery.orderList.forEach((order) => {
+            //     qtdTotal = qtdTotal + order.quantity
+            // });
+
+        });
+        return 0
 
         //Caixas:
             //Tipo
             //Qtd de Itens na caixa
             //Cod. dos Pedidos contidos na caixa ( o mesmo pedido pode aparecer em mais de uma caixa)
         console.log('TOTAL ', total)
-        let G = 30
-        let M = 10
-        let P = 5
+        // let G = 30
+        // let M = 10
+        // let P = 5
         let boxList = {}
         let ordersList = []
         // let usedBoxDto = new UsedBoxDto()

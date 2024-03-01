@@ -4,7 +4,7 @@ export class UsedBoxDto {
 
     type: String;
     itemsQty: number;
-    ordersId: Array<string>;
+    ordersId: string[] = []
     // menu_names: Array<string>;
 
     // boxes: CreateBoxDto;
