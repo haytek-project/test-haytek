@@ -16,10 +16,9 @@ export class DeliveryService {
         private readonly carriesService: CarriersService,
         private readonly ordersService: OrdersService        
         ){}
-
+        
     
     async delivery(){
-
        
         // function isSameDay(d1, d2) {
         //     return d1.getFullYear() === d2.getFullYear() &&
@@ -62,7 +61,7 @@ export class DeliveryService {
 
 
 
-        let delivery = []
+        let deliveryFullList = []
         const ordersDateList = this.getOrdersDate(orders)
         // const orderAdressList = this.getOrdersAdress(orders)
 
@@ -78,43 +77,46 @@ export class DeliveryService {
                         const groupedByCarrierOrderList = this.groupOrdersByCarrier(carriers[carrier].Id, groupedByAdressOrderList)
                         
                         if (groupedByCarrierOrderList != undefined && groupedByCarrierOrderList.length != 0){
-                            let delivery = new CreateDeliveryDto()
-                            // let qtdItens = 0
+                            console.log("indiciando deliveryDTO")
+                            let regularDelivery = new CreateDeliveryDto()
+                            let cutOffDelivery  = new CreateDeliveryDto()
+
                             
                             console.log(groupedByCarrierOrderList)
-                            for (const item in groupedByCarrierOrderList){            
-                                delivery.adress = this.findAdressById(groupedByCarrierOrderList[item].addressId, adresses)[0]
-                                delivery.carrier = this.findCarrierBydId(groupedByCarrierOrderList[item].carrierId, carriers)[0]
-                                // qtdItens = qtdItens + groupedByCarrierOrderList[item].quantity
-                                // console.log(typeof(delivery.carrier.cutOffTime))
+                            for (const item in groupedByCarrierOrderList){    
+                                let order = groupedByCarrierOrderList[item]        
+                                let adress = this.findAdressById(order.addressId, adresses)[0]
+                                let carrier = this.findCarrierBydId(order.carrierId, carriers)[0]
 
-                                const orderHour =  Number(new Date(groupedByCarrierOrderList[item].createdAt).getUTCHours())
-                                const orderMinutes =  Number(new Date(groupedByCarrierOrderList[item].createdAt).getMinutes())
+
+                                let orderCreatedDate = new Date(order.createdAt)
+                                const orderHour =  Number(orderCreatedDate.getUTCHours())
+                                const orderMinutes =  Number(orderCreatedDate.getMinutes())
                                 const orderTime = ((orderHour * 60) + orderMinutes)
 
-                                const cutOffHour = Number(delivery.carrier.cutOffTime.split(':')[0])
-                                const cutOffMinutes = Number(delivery.carrier.cutOffTime.split(':')[1])
-                                const cutOffTime = ((cutOffHour * 60) + cutOffMinutes)
+                                const cutOffHour = Number(carrier.cutOffTime.split(':')[0])
+                                const cutOffMinutes = Number(carrier.cutOffTime.split(':')[1])
+                                const cutOffTime = ((cutOffHour * 60) + cutOffMinutes)                                              
 
-                     
-                                
-                                // console.log('CORTE ->', cutOffHour, cutOffMinutes)
-                                // console.log('ORDER ->', orderHour, orderMinutes)
-                                // console.log(delivery.carrier)
-                                
-
-                                if (orderTime < cutOffTime){                                    
-                                    delivery.sendDate = new Date()
-                                    console.log("HOJE")
+                                if (orderTime < cutOffTime){            
+                                    // DIA ATUAL                      
+                                    regularDelivery.sendDate = orderCreatedDate
+                                    regularDelivery.adress = adress
+                                    regularDelivery.carrier = carrier
+                                    // regularDelivery.orders.push( order )
                                 }else{
-                                    let dt = new Date()
-                                    dt.setDate(dt.getDate() + 1)
-                                    delivery.sendDate = dt
-                                    console.log("AMANHA")
+                                    // DIA SEGUINTE
+                                    orderCreatedDate.setDate(orderCreatedDate.getDate() + 1)
+                                    cutOffDelivery.sendDate = orderCreatedDate
+                                    cutOffDelivery.adress = adress
+                                    cutOffDelivery.carrier = carrier
+                                    // regularDelivery.orders.push( order )
                                 }
-                                // Verificar Data de Corte
                             }
-                            console.log(delivery)
+                            console.log(regularDelivery, cutOffDelivery)
+                            if (regularDelivery.sendDate != undefined) deliveryFullList.push(regularDelivery)
+                            if (cutOffDelivery.sendDate != undefined) deliveryFullList.push(cutOffDelivery)
+                        
                             // console.log(qtdItens)
                             // this.getBoxesPerDelivery(qtdItens, groupedByCarrierOrderList, boxes)
                             console.log('------------------')
@@ -126,7 +128,7 @@ export class DeliveryService {
                 
             }
         }
-        
+        return deliveryFullList
 
         // for (const item in ordersDate){
         //     const orderDate = new Date(ordersDate[item])

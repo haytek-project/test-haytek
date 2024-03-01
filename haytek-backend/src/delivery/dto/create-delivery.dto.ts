@@ -9,7 +9,7 @@ export class CreateDeliveryDto {
     sendDate: Date;
     carrier: CreateCarrierDto;
     adress: CreateAdressDto;
-    orders: CreateOrderDto;
+    orders: CreateOrderDto[];
     // boxes: CreateBoxDto;
       //-Tipo
       //-Qtd de itens na caixa
