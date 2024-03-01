@@ -191,193 +191,45 @@ export class DeliveryService {
         let P = 5
         deliveryFullList.forEach((delivery) => {
             console.log(delivery)
-            // console.log(delivery.orderList)
             let BoxesList = []
             let totalDelivery = delivery.totalQuantity
             delivery.orderList.forEach((order) => {
                 let totalOrder = order.quantity
-                console.log(totalDelivery)
-                console.log(totalOrder)
                 
                 while (totalDelivery > 0 && totalOrder > 0){
                     if (totalOrder >= G){
-                        let usedBoxDto = new UsedBoxDto()
-                        usedBoxDto.itemsQty = G
-                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                        usedBoxDto.type = 'G'
-                        totalDelivery = totalDelivery - G
-                        totalOrder = totalOrder - G
-                        BoxesList.push(usedBoxDto)
-                        console.log("caixa G")
-                        console.log(totalDelivery)
-                        console.log(totalOrder)
-                        
+                        totalDelivery = totalDelivery - G; totalOrder = totalOrder - G
+                        BoxesList.push(this.addItemsIntoBox('G', G, order.Id))
                     }
-                    if (totalOrder > M && totalOrder < G){
-                        let usedBoxDto = new UsedBoxDto()
-                        usedBoxDto.itemsQty = M
-                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                        usedBoxDto.type = 'M'
-                        totalDelivery = totalDelivery - M
-                        totalOrder = totalOrder - M
-                        BoxesList.push(usedBoxDto)
-                        console.log("caixa M")
-                        console.log(totalDelivery)
-                        console.log(totalOrder)
-
+                    if (totalOrder >= M && totalOrder < G){
+                        totalDelivery = totalDelivery - M; totalOrder = totalOrder - M
+                        BoxesList.push(this.addItemsIntoBox('M', M, order.Id))
                     }
                     if (totalOrder > P && totalOrder < M){
-                        let usedBoxDto = new UsedBoxDto()
-                        usedBoxDto.itemsQty = P
-                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                        usedBoxDto.type = 'P'
-                        totalDelivery = totalDelivery - P
-                        totalOrder = totalOrder - P
-                        BoxesList.push(usedBoxDto)
-                        console.log("caixa P")
-                        console.log(totalDelivery)
-                        console.log(totalOrder)
-
+                        totalDelivery = totalDelivery - P; totalOrder = totalOrder - P
+                        BoxesList.push(this.addItemsIntoBox('P', P, order.Id))
                     }
-                    if (totalOrder <= P ){
-                        let usedBoxDto = new UsedBoxDto()
-                        usedBoxDto.itemsQty = totalOrder
-                        usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                        usedBoxDto.type = 'P'
-                        totalDelivery = totalDelivery - totalOrder
-                        totalOrder = totalOrder - totalOrder
-                        BoxesList.push(usedBoxDto)
-                        console.log("caixa P")
-                        console.log(totalDelivery)
-                        console.log(totalOrder)
-
+                    if (totalOrder <= P && totalOrder != 0 ){                        
+                        BoxesList.push(this.addItemsIntoBox('P', totalOrder, order.Id))
+                        totalDelivery = totalDelivery - totalOrder; totalOrder = totalOrder - totalOrder
                     }
-                    // exit()
+                    
                 }
-
-                
-
-                
-
-                // while ( total < M){
-                //     if (order.quantity > P){
-                //         let usedBoxDto = new UsedBoxDto()
-                //         usedBoxDto.itemsQty = 5
-                //         usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                //         usedBoxDto.type = 'P'
-                //         total = total - P
-                //         BoxesList.push(usedBoxDto)
-                //     }
-                //     if (order.quantity < P){
-                //         let usedBoxDto = new UsedBoxDto()
-                //         usedBoxDto.itemsQty = 5
-                //         usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                //         usedBoxDto.type = 'P'
-                //         total = total - P
-                //         BoxesList.push(usedBoxDto)
-                //     }
-                // }
-
-                // while (total <= P){
-                //     if (order.quantity > P){
-                //         let usedBoxDto = new UsedBoxDto()
-                //         usedBoxDto.itemsQty = 5
-                //         usedBoxDto.ordersId.indexOf(order.Id) === -1 ? usedBoxDto.ordersId.push(order.Id): console.log("This item already exists")
-                //         usedBoxDto.type = 'P'
-                //         total = total - P
-                //         BoxesList.push(usedBoxDto)
-                //     }
-                // }
                 
             });
-            console.log(BoxesList)
+            delivery.Boxes = BoxesList
 
-            // delivery.orderList.forEach((order) => {
-            //     qtdTotal = qtdTotal + order.quantity
-            // });
 
         });
-        return 0
+        return deliveryFullList
+    }
 
-        //Caixas:
-            //Tipo
-            //Qtd de Itens na caixa
-            //Cod. dos Pedidos contidos na caixa ( o mesmo pedido pode aparecer em mais de uma caixa)
-        console.log('TOTAL ', total)
-        // let G = 30
-        // let M = 10
-        // let P = 5
-        let boxList = {}
-        let ordersList = []
-        // let usedBoxDto = new UsedBoxDto()
-        console.log(orders)
-        for(const order in orders){
-            while (total > G){
-                if (orders[order].quantity > G){
-                    console.log("quantity MAIOR que 30")
-                    console.log(orders[order].quantity)
-                    total = total - G
-                    boxList['type'] = 'G'
-                    ordersList.indexOf(orders[order].Id) === -1 ? ordersList.push(orders[order].Id): console.log("This item already exists");
-                    boxList['orders'] = ordersList
-                    boxList['itemsQty'] = G
-                    console.log(total)
-                }
-            }
-            while (total > M && total < G){
-                if (orders[order].quantity > M){
-                    console.log("quantity MAIOR que 10")
-                    console.log(orders[order].quantity)
-                    total = total - M
-                    boxList['type'] = 'M'
-                    ordersList.indexOf(orders[order].Id) === -1 ? ordersList.push(orders[order].Id): console.log("This item already exists");
-                    boxList['orders'] = ordersList
-                    boxList['itemsQty'] = M
-                    console.log(total)
-                }
-            }
-            console.log(boxList)
-
-
-        }
-        return 0
-
-        // console.log(DiasDaSemana.DOMINGO)
-        let boxesList = {}
-        for (const box in boxes){
-            boxesList['type'] = boxes[box].type
-            boxesList['qtd'] = boxes[box].maxQuantity
-        }
-        // console.log(boxesList)
-
-
-        // let G = 0
-        // let M = 0
-        // let P = 0
-
-        // console.log(qtd)
-        // while (qtd > 0){
-        //     if (qtd > 30){
-        //         G = G + 1
-        //         qtd = qtd - 30
-        //     }
-        //     if (qtd >= 10 && qtd < 30){
-        //         M = M + 1
-        //         qtd = qtd - 10
-        //     }
-        //     if (qtd > 5 && qtd < 10 ){
-        //         P = P + 1
-        //         qtd = qtd - 5
-        //     }
-        //     if (qtd <= 5){
-        //         P = P + 1
-        //         qtd = qtd - 5
-        //     }
-        // }
-        // console.log("box_G", G)
-        // console.log("box_M", M)
-        // console.log("box_P", P)
-
+    addItemsIntoBox(size, qtd, orderId){
+        let usedBoxDto = new UsedBoxDto()
+        usedBoxDto.itemsQty = qtd
+        usedBoxDto.ordersId.indexOf(orderId) === -1 ? usedBoxDto.ordersId.push(orderId): console.log("This item already exists")
+        usedBoxDto.type = size
+        return usedBoxDto
     }
 
 }
