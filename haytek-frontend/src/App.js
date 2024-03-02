@@ -20,40 +20,41 @@ function App() {
   return (
 
       <div>
-      <h1>ENTREGAS</h1>
+      <h2>RELATÓRIO DE ENTREGAS</h2>
 
       {
         posts.map((delivery) => {
-          return (
-            
+          const a = new Date(delivery.sendDate).toLocaleDateString('pt-BR') 
+          return (            
             <div>        
-
-              <li>Data de envio: {delivery.sendDate}</li>
-              <li>Total de itens: {delivery.totalQuantity}</li>
-              <li></li>
-              <li>Endereço</li>
-              <li>Estado: {delivery.adress.state}</li>
-              <li>Cidade: {delivery.adress.city}</li>
-              <li>Rua: {delivery.adress.street}</li>
-              <li>Bairro: {delivery.adress.neighborhood}</li>
-              <li>Complemento: {delivery.adress.complement}</li>
-              <li>CEP: {delivery.adress.zipcode}</li>
-              <li></li>
-              <li>Transportadora: {delivery.carrier.name}</li>
-              <li></li>
-              {
-                delivery.Boxes.map((box) => {
-                  return(
-                    <div>
-                      <li>Tamanho: {box.type}</li>
-                      <li>Itens: {box.itemsQty}</li>
-                      <li>Pedidos: {box.ordersId}</li>
-                    </div>
-                )            
-                })
-              }
-              <li></li>
-              <li></li>
+              <dl>
+                <dt><b>Data de envio:</b></dt>
+                <dd>{a}</dd>
+                {/* <dt><b>Total de itens:</b> {delivery.totalQuantity}</dt> */}
+                <dt><b>Endereço:</b></dt>
+                <dd>Estado: {delivery.adress.state}</dd>
+                <dd>Cidade: {delivery.adress.city}</dd>
+                <dd>Rua: {delivery.adress.street}</dd>
+                <dd>Bairro: {delivery.adress.neighborhood}</dd>
+                <dd>Complemento: {delivery.adress.complement}</dd>
+                <dd>CEP: {delivery.adress.zipcode}</dd>
+                <dt><b>Transportadora:</b></dt>
+                <dd>{delivery.carrier.name}</dd>
+                <dt><b>Caixas</b></dt>
+                {
+                  delivery.Boxes.map((box) => {
+                    return(
+                      <div>
+                        <dd>Tamanho: {box.type}</dd>
+                        <dd>Itens: {box.itemsQty}</dd>
+                        <dd>Pedidos: {box.ordersId}</dd>
+                        <p></p>
+                      </div>
+                  )            
+                  })
+                }
+              </dl>
+              <br/>
           </div>
           )
           })
