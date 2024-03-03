@@ -9,7 +9,7 @@ export class CarriersService {
   constructor(private readonly httpService : HttpService){}
 
   async findAll(): Promise<CreateCarrierDto[]> {
-    const createCarrierDto: CreateCarrierDto[] = await this.httpService.axiosRef.get<CreateCarrierDto>('https://stg-api.haytek.com.br/api/v1/test-haytek-api/carriers')
+    const createCarrierDto: CreateCarrierDto[] = await this.httpService.axiosRef.get<CreateCarrierDto>(process.env.CARRIER_API_URL)
     .then((result)=>{
       return result.data
     }).catch((error) => {

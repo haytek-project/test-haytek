@@ -10,7 +10,7 @@ export class AdressesService {
   async findAll(): Promise<CreateAdressDto[]> {
 
     const createAdressDto: CreateAdressDto[] = await this.httpService.axiosRef.
-    get<CreateAdressDto>('https://stg-api.haytek.com.br/api/v1/test-haytek-api/adresses')
+    get<CreateAdressDto>(process.env.ADRESS_API_URL)
     .then((result)=>{
       return result.data
     }).catch((error) => {
