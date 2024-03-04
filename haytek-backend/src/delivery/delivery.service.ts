@@ -95,7 +95,6 @@ export class DeliveryService {
                                     cutOffDelivery.totalQuantity = cutOffDelivery.totalQuantity + order.quantity
                                 }
                             });
-                            // console.log(regularDelivery, cutOffDelivery)
                             if (regularDelivery.sendDate != undefined) deliveryFullList.push(regularDelivery)
                             if (cutOffDelivery.sendDate != undefined) deliveryFullList.push(cutOffDelivery)                            
                         }
@@ -105,10 +104,10 @@ export class DeliveryService {
             });
         });
 
-        this.getBoxesPerDelivery(deliveryFullList, boxes)
 
-
-        return deliveryFullList
+        
+        return this.getBoxesPerDelivery(deliveryFullList, boxes)
+        // return deliveryFullList
 
     }
 
@@ -186,48 +185,76 @@ export class DeliveryService {
     }
 
     getBoxesPerDelivery(deliveryFullList, boxes){
-        let G = 30
-        let M = 10
-        let P = 5
+
+        // ordernando array de caixas
+        boxes.sort(
+            function(a,b){return b.maxQuantity - a.maxQuantity}
+        )
+
+
         deliveryFullList.forEach((delivery) => {
-            console.log(delivery)
             let BoxesList = []
             let totalDelivery = delivery.totalQuantity
-            delivery.orderList.forEach((order) => {
-                let totalOrder = order.quantity
+            let diff = 0 
+            delivery.orderList.forEach((order, orderIndex) => {
+
+                let totalOrder = Number(order.quantity) - diff
+                let orderIdList = []
+                console.log(delivery)
                 
-                while (totalDelivery > 0 && totalOrder > 0){
-                    if (totalOrder >= G){
-                        totalDelivery = totalDelivery - G; totalOrder = totalOrder - G
-                        BoxesList.push(this.addItemsIntoBox('G', G, order.Id))
-                    }
-                    if (totalOrder >= M && totalOrder < G){
-                        totalDelivery = totalDelivery - M; totalOrder = totalOrder - M
-                        BoxesList.push(this.addItemsIntoBox('M', M, order.Id))
-                    }
-                    if (totalOrder > P && totalOrder < M){
-                        totalDelivery = totalDelivery - P; totalOrder = totalOrder - P
-                        BoxesList.push(this.addItemsIntoBox('P', P, order.Id))
-                    }
-                    if (totalOrder <= P && totalOrder != 0 ){                        
-                        BoxesList.push(this.addItemsIntoBox('P', totalOrder, order.Id))
-                        totalDelivery = totalDelivery - totalOrder; totalOrder = totalOrder - totalOrder
+                boxes.forEach((box, boxIndex) => {                                 
+
+                    while (totalDelivery > 0){
+
+                        if (totalOrder >= box.maxQuantity){  
+                            orderIdList.push(order.Id)                          
+                            BoxesList.push(this.addItemsIntoBox(box.type, box.maxQuantity, orderIdList ))
+                            totalOrder = Number(totalOrder) - Number(box.maxQuantity)
+                            totalDelivery = Number(totalDelivery) - Number(box.maxQuantity)
+                        }
+
+                        if (totalOrder != 0 && totalOrder < box.maxQuantity && totalDelivery > box.maxQuantity){
+                            orderIdList.push(order.Id)
+                            if(totalOrder < totalDelivery){
+                                orderIdList.push(delivery.orderList[orderIndex+1].Id)
+                            }
+                            BoxesList.push(this.addItemsIntoBox(box.type, box.maxQuantity, orderIdList))
+                            diff = Number(box.maxQuantity) - Number(totalOrder)
+                            totalDelivery = Number(totalDelivery) - Number(box.maxQuantity)
+                            totalOrder = 0
+                            break
+                        }
+
+                        if (totalOrder != 0 && totalOrder < box.maxQuantity && totalDelivery < box.maxQuantity && boxIndex == boxes.length-1){
+                            orderIdList.push(order.Id)
+                            BoxesList.push(this.addItemsIntoBox(box.type, totalOrder, orderIdList ))
+                            totalOrder = 0
+                            totalDelivery = 0
+                        }
+                        if (totalOrder < box.maxQuantity && totalDelivery < box.maxQuantity && boxIndex < boxes.length-1 ){
+                            break
+                        }
+                        if (totalOrder == 0)
+                            break
                     }
                     
-                }
-                
+
+                });
+                delivery.Boxes = BoxesList
+
             });
-            delivery.Boxes = BoxesList
-
-
+            
         });
+
         return deliveryFullList
     }
 
-    addItemsIntoBox(size, qtd, orderId){
+    addItemsIntoBox(size, qtd, orderIdList){
         let usedBoxDto = new UsedBoxDto()
-        usedBoxDto.itemsQty = qtd
-        usedBoxDto.ordersId.indexOf(orderId) === -1 ? usedBoxDto.ordersId.push(orderId): console.log("This item already exists")
+        usedBoxDto.itemsQty = Number(qtd)
+        orderIdList.forEach((element) => {
+            usedBoxDto.ordersId.indexOf(element) === -1 ? usedBoxDto.ordersId.push(element): console.log('');
+        });
         usedBoxDto.type = size
         return usedBoxDto
     }

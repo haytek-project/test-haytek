@@ -8,6 +8,7 @@ export class OrdersService {
   constructor(private readonly httpService: HttpService) {}
 
   async findAll(): Promise<CreateOrderDto[]> {
+
     const createOrderDto: CreateOrderDto[] = await this.httpService.axiosRef.get<CreateOrderDto>(process.env.ORDER_API_URL)
     .then((result)=>{
       return result.data
@@ -15,6 +16,6 @@ export class OrdersService {
       console.log(error)
       return undefined
     });  
-    return createOrderDto;
+    return createOrderDto;   
   }
 }

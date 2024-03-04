@@ -9,6 +9,7 @@ export class CarriersService {
   constructor(private readonly httpService : HttpService){}
 
   async findAll(): Promise<CreateCarrierDto[]> {
+
     const createCarrierDto: CreateCarrierDto[] = await this.httpService.axiosRef.get<CreateCarrierDto>(process.env.CARRIER_API_URL)
     .then((result)=>{
       return result.data
@@ -16,12 +17,8 @@ export class CarriersService {
       console.log(error)
       return undefined
     }); 
-    return createCarrierDto; 
-  } 
+    return createCarrierDto;     
 
-  // getVehicleMake(): Observable<AxiosResponse<any>> {
-  //   return  this.httpService.get('https://vpic.nhtsa.dot.gov/api/vehicles/getallmakes?format=json')
-  //     .pipe(map(response => response.data.Results.map(result => result.Make_Name));
-  // }
+  } 
 
 }
