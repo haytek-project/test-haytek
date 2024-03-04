@@ -12,6 +12,7 @@ export class CarriersService {
 
     const createCarrierDto: CreateCarrierDto[] = await this.httpService.axiosRef.get<CreateCarrierDto>(process.env.CARRIER_API_URL)
     .then((result)=>{
+      console.log("Consultando api externa de carrier")
       return result.data
     }).catch((error) => {
       console.log(error)

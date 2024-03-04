@@ -5,9 +5,6 @@ import { CarriersService } from 'src/carriers/carriers.service';
 import { OrdersService } from 'src/orders/orders.service';
 import { CreateDeliveryDto } from './dto/create-delivery.dto';
 import { UsedBoxDto } from './dto/usedBox.dto';
-import { CreateOrderDto } from 'src/orders/dto/create-order.dto';
-import { exit } from 'process';
-
 
 
 @Injectable()
@@ -26,16 +23,6 @@ export class DeliveryService {
         const carriers = await this.carriesService.findAll()
         const orders = await this.ordersService.findAll()
     
-
-        //Ordenando pedidos retornados pela api
-        // orders.sort(function compare(a, b) {
-        //     var dateA = +new Date(a.createdAt);
-        //     var dateB = +new Date(b.createdAt);
-        //     return dateA - dateB;
-        //   });
-
-
-
         let deliveryFullList = []
         //Pegando uma lista com a datas únicas dos pedidos retornados na api de pedidos
         const ordersDateList = this.getOrdersDate(orders)
@@ -103,16 +90,8 @@ export class DeliveryService {
                 
             });
         });
-
-
-        
         return this.getBoxesPerDelivery(deliveryFullList, boxes)
-        // return deliveryFullList
-
     }
-
-
-
 
 
     findCarrierBydId(Id, carriers){
@@ -154,9 +133,7 @@ export class DeliveryService {
                     internalDate.getUTCMonth() === orderDate.getUTCMonth() && 
                     internalDate.getUTCFullYear() === orderDate.getUTCFullYear()
         });
-        return ordersSortedByDate
-
-        
+        return ordersSortedByDate        
     }
 
     getOrdersDate(orders){
@@ -166,7 +143,6 @@ export class DeliveryService {
             if (!(ordersDate.includes(orderDate.toDateString()))){
                 ordersDate.push(orderDate.toDateString())
             } 
-
         });
         return ordersDate
     }
@@ -178,10 +154,8 @@ export class DeliveryService {
             if (!(ordersAdress.includes(o.addressId))){
                 ordersAdress.push(o.addressId)
             } 
-
         });
         return ordersAdress
-
     }
 
     getBoxesPerDelivery(deliveryFullList, boxes){
@@ -191,7 +165,6 @@ export class DeliveryService {
             function(a,b){return b.maxQuantity - a.maxQuantity}
         )
 
-
         deliveryFullList.forEach((delivery) => {
             let BoxesList = []
             let totalDelivery = delivery.totalQuantity
@@ -200,7 +173,6 @@ export class DeliveryService {
 
                 let totalOrder = Number(order.quantity) - diff
                 let orderIdList = []
-                console.log(delivery)
                 
                 boxes.forEach((box, boxIndex) => {                                 
 
@@ -236,16 +208,11 @@ export class DeliveryService {
                         }
                         if (totalOrder == 0)
                             break
-                    }
-                    
-
+                    }                
                 });
                 delivery.Boxes = BoxesList
-
-            });
-            
+            });            
         });
-
         return deliveryFullList
     }
 
@@ -253,7 +220,7 @@ export class DeliveryService {
         let usedBoxDto = new UsedBoxDto()
         usedBoxDto.itemsQty = Number(qtd)
         orderIdList.forEach((element) => {
-            usedBoxDto.ordersId.indexOf(element) === -1 ? usedBoxDto.ordersId.push(element): console.log('');
+            usedBoxDto.ordersId.indexOf(element) === -1 ? usedBoxDto.ordersId.push(element): console.log(element, 'Alread exists in orderIdList');
         });
         usedBoxDto.type = size
         return usedBoxDto

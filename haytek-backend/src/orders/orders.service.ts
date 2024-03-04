@@ -11,6 +11,7 @@ export class OrdersService {
 
     const createOrderDto: CreateOrderDto[] = await this.httpService.axiosRef.get<CreateOrderDto>(process.env.ORDER_API_URL)
     .then((result)=>{
+      console.log("Consultando api externa de orders")
       return result.data
     }).catch((error) => {
       console.log(error)

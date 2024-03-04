@@ -11,6 +11,7 @@ export class BoxesService {
   async findAll(): Promise<CreateBoxDto[]> {
     const createBoxDto: CreateBoxDto[] = await this.httpService.axiosRef.get<CreateBoxDto>(process.env.BOX_API_URL)
     .then((result)=>{
+      console.log("Consultando api externa de boxes")
       return result.data
     }).catch((error) => {
       console.log(error)

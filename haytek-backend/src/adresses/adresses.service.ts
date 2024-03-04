@@ -12,6 +12,7 @@ export class AdressesService {
     const createAdressDto: CreateAdressDto[] = await this.httpService.axiosRef.
     get<CreateAdressDto>(process.env.ADRESS_API_URL)
     .then((result)=>{
+      console.log("Consultando api externa de adress")
       return result.data
     }).catch((error) => {
       console.log(error)

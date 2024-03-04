@@ -8,12 +8,8 @@ import { AxiosResponse } from 'axios';
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
-
-
   @Get()
   async findAll(): Promise<CreateOrderDto[]>{
     return await this.ordersService.findAll();
   }
-
-
 }
