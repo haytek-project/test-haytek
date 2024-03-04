@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { AxiosResponse } from 'axios';
 import { HttpService } from '@nestjs/axios';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -13,10 +13,15 @@ export class OrdersService {
     .then((result)=>{
       console.log("Consultando api externa de orders")
       return result.data
-    }).catch((error) => {
-      console.log(error)
-      return undefined
-    });  
+    }).catch((error) => { 
+      throw new HttpException({
+        status: HttpStatus.NOT_FOUND,
+        error: 'External Orders API does not responde',
+      }, HttpStatus.FORBIDDEN, {
+        cause: error
+      });
+      return undefined;
+    });
     return createOrderDto;   
   }
 }

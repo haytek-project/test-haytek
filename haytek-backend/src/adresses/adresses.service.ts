@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { AxiosResponse } from 'axios';
 import { CreateAdressDto } from './dto/create-adress.dto';
@@ -14,8 +14,13 @@ export class AdressesService {
     .then((result)=>{
       console.log("Consultando api externa de adress")
       return result.data
-    }).catch((error) => {
-      console.log(error)
+    }).catch((error) => { 
+        throw new HttpException({
+          status: HttpStatus.NOT_FOUND,
+          error: 'External Address API does not responde',
+        }, HttpStatus.FORBIDDEN, {
+          cause: error
+        });
       return undefined
     }); 
     return createAdressDto
