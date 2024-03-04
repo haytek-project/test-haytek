@@ -7,8 +7,10 @@ import React, { useEffect, useState } from "react";
 function App() {
   const [posts, setPosts] = useState([]);
 
+  console.log(process.env.REACT_APP_DELIVERY_API_URL)
+
   useEffect(() => {
-    axios.get('http://localhost:3001/delivery')
+    axios.get(process.env.REACT_APP_DELIVERY_API_URL)
       .then(response => {
         setPosts(response.data);
       })
@@ -30,16 +32,16 @@ function App() {
               <dl>
                 <dt><b>Data de envio:</b></dt>
                 <dd>{a}</dd>
-                {/* <dt><b>Total de itens:</b> {delivery.totalQuantity}</dt> */}
-                <dt><b>Endereço:</b></dt>
-                <dd>Estado: {delivery.adress.state}</dd>
-                <dd>Cidade: {delivery.adress.city}</dd>
-                <dd>Rua: {delivery.adress.street}</dd>
-                <dd>Bairro: {delivery.adress.neighborhood}</dd>
-                <dd>Complemento: {delivery.adress.complement}</dd>
-                <dd>CEP: {delivery.adress.zipcode}</dd>
                 <dt><b>Transportadora:</b></dt>
                 <dd>{delivery.carrier.name}</dd>
+                {/* <dt><b>Total de itens:</b> {delivery.totalQuantity}</dt> */}
+                <dt><b>Endereço:</b></dt>
+                <dd>Cidade: {delivery.adress.city}</dd>
+                <dd>Bairro: {delivery.adress.neighborhood}</dd>
+                <dd>Rua: {delivery.adress.street}</dd>
+                <dd>Complemento: {delivery.adress.complement}</dd>
+                <dd>Estado: {delivery.adress.state}</dd>
+                <dd>CEP: {delivery.adress.zipcode}</dd>
                 <dt><b>Caixas</b></dt>
                 {
                   delivery.Boxes.map((box) => {
@@ -47,7 +49,19 @@ function App() {
                       <div>
                         <dd>Tamanho: {box.type}</dd>
                         <dd>Itens: {box.itemsQty}</dd>
-                        <dd>Pedidos: {box.ordersId}</dd>
+                        <dd>Pedidos: </dd>
+                        <dd>
+                        {
+                          box.ordersId.map((pedido) => {
+                            return (
+                              <div>
+                                <dd>{pedido}</dd>
+                              </div>
+                            )
+                          })
+
+                        }
+                        </dd>
                         <p></p>
                       </div>
                   )            
